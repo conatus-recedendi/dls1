@@ -35,7 +35,7 @@ def run():
         input_size=784,
         hidden_size_list=[100],
         output_size=10,
-        weight_init_std=0.01,
+        weight_init_std=wandb.config.weight_init_std,
         activation=wandb.config.activation,
     )
 
