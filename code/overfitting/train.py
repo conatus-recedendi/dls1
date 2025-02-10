@@ -16,6 +16,9 @@ from common.optimizer import SGD, Momentum, AdaGrad, Adam
 
 (x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
 
+x_train = x_train[:300]
+t_train = t_train[:300]
+
 
 def run():
 
