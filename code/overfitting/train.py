@@ -9,7 +9,7 @@ from dataset.mnist import load_mnist
 
 from common.multi_layer_net import MultiLayerNet
 from common.trainer import Trainer
-from common.optimizer import SGD
+from common.optimizer import SGD, Momentum, AdaGrad, Adam
 
 
 ### training ###
@@ -20,7 +20,7 @@ from common.optimizer import SGD
 def run():
 
     wandb.init(
-        name="two_layer_model re-implementation",
+        name="overfitting",
     )
 
     np.random.seed(wandb.config.seed)
@@ -32,9 +32,22 @@ def run():
         os.makedirs(output_name)
 
     model = MultiLayerNet(
-        input_size=784, hidden_size_list=[100], output_size=10, weight_init_std=0.01
+        input_size=784,
+        hidden_size_list=[100, 100, 100, 100, 100, 100, 100],
+        output_size=10,
+        weight_init_std=wandb.config.weight_init_std,
+        activation=wandb.config.activation,
+        weight_decay_lambda=wandb.config.weight_decay_lambda,
+        use_dropout=True,
+        dropout_ratio=wandb.config.dropout,
     )
-    optimizer = SGD(lr=wandb.config.learning_rate)
+
+    optimizer = {
+        "SGD": SGD(lr=wandb.config.learning_rate),
+        "Momentum": Momentum(lr=wandb.config.learning_rate),
+        "AdaGrad": AdaGrad(lr=wandb.config.learning_rate),
+        "Adam": Adam(lr=wandb.config.learning_rate),
+    }[wandb.config.gradient_descent]
 
     trainer = Trainer(
         model,
@@ -79,24 +92,24 @@ def run():
             print(json.dumps(timing))
             f.write(f"{layer}: {json.dumps(timing)}\n")
 
-    # save pkl file
-
-    # matrix: check diff between numerical difference and back propagation
-
-
-train_loss_history = []
-
-
-seeds = [1000, 2000, 3000, 4000, 5000]
 
 wandb_sweep_config = {
+    "name": "overfitting",
     "method": "grid",
     "metric": {"name": "test_acc", "goal": "maximize"},
     "parameters": {
-        "seed": {"values": seeds},
+        "seed": {"value": 1000},
+        "gradient_descent": {"value": "SGD"},
         "learning_rate": {"value": 0.01},
-        "epochs": {"value": 100},
+        "epochs": {"value": 300},
         "batch_size": {"value": 100},
+        "model": {"value": "MultiLayerNet-7layer"},
+        "batch_norm": {"value": False},
+        "weight_decay_lambda": {"values": [0, 0.1]},
+        "dataset": {"value": "mnist-300"},
+        "activation": {"value": "relu"},
+        "weight_init_std": {"value": "he"},
+        "dropout": {"values": [0, 0.15]},
     },
 }
 
