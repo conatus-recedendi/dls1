@@ -43,10 +43,9 @@ class Trainer:
 
         for epoch in range(self.epochs):
             len_inputs = len(self.x_train)
-            for i in range(0, len_inputs, self.batch_size):
+            for i in range(0, len_inputs, self.batch_size)
                 inputs_batch = self.x_train[i : i + self.batch_size]
                 labels_batch = self.t_train[i : i + self.batch_size]
-
                 loss = self.train_one_batch(inputs_batch, labels_batch)
 
                 # TODO: record loss per iter
