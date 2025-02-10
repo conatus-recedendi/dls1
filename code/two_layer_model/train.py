@@ -91,6 +91,7 @@ seeds = [1000, 2000, 3000, 4000, 5000]
 
 wandb_sweep_config = {
     "method": "grid",
+    "name": "two_layer_model",
     "metric": {"name": "test_acc", "goal": "maximize"},
     "parameters": {
         "seed": {"values": seeds},

@@ -95,6 +95,7 @@ seeds = [1000, 2000, 3000, 4000, 5000]
 
 wandb_sweep_config = {
     "method": "grid",
+    "name": "gradient_descent",
     "metric": {"name": "test_acc", "goal": "maximize"},
     "parameters": {
         "seed": {"value": 1000},

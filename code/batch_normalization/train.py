@@ -93,6 +93,7 @@ def run():
 
 wandb_sweep_config = {
     "method": "grid",
+    "name": "batch_normalization",
     "metric": {"name": "test_acc", "goal": "maximize"},
     "parameters": {
         "seed": {"value": 1000},
