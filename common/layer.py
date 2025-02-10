@@ -27,6 +27,21 @@ class MulLayer:
         self.backward_time += time.perf_counter() - start
         return dx, dy
 
+    def memory_usage(self):
+        # ReLU는 파라미터나 기울기를 갖지 않으므로 activation만 계산
+        mem_params = (
+            self.x.nbytes + self.y.nbytes
+            if self.x is not None and self.y is not None
+            else 0
+        )
+        mem_gradients = 0
+        mem_activation = 0
+        return {
+            "params": mem_params,
+            "gradients": mem_gradients,
+            "activation": mem_activation,
+        }
+
 
 class AddLayer:
     def __init__(self):
@@ -44,6 +59,17 @@ class AddLayer:
         dy = dout * 1
         self.backward_time += time.perf_counter() - start
         return dx, dy
+
+    def memory_usage(self):
+        # ReLU는 파라미터나 기울기를 갖지 않으므로 activation만 계산
+        mem_params = 0
+        mem_gradients = 0
+        mem_activation = 0
+        return {
+            "params": mem_params,
+            "gradients": mem_gradients,
+            "activation": mem_activation,
+        }
 
 
 class ReLULayer:
@@ -106,6 +132,16 @@ class SigmoidLayer:
         self.backward_time += time.perf_counter() - start
 
         return dx
+
+    def memory_usage(self):
+        mem_params = 0
+        mem_gradients = 0
+        mem_activation = self.out.nbytes if self.out is not None else 0
+        return {
+            "params": mem_params,
+            "gradients": mem_gradients,
+            "activation": mem_activation,
+        }
 
 
 class AffineLayer:
@@ -177,6 +213,21 @@ class SoftmaxWithLoss:
         dx = (self.y - self.t) / batch_size
         self.backward_time += time.perf_counter() - start
         return dx
+
+    def memory_usage(self):
+
+        mem_params = (
+            self.y.nbytes + self.t.nbytes
+            if self.y is not None and self.t is not None
+            else 0
+        )
+        mem_gradients = 0
+        mem_activation = self.mask.nbytes if self.mask is not None else 0
+        return {
+            "params": mem_params,
+            "gradients": mem_gradients,
+            "activation": mem_activation,
+        }
 
 
 class BatchNormalization:
@@ -269,6 +320,26 @@ class BatchNormalization:
 
         return dx
 
+    def memory_usage(self):
+        mem_params = (
+            self.gamma.nbytes
+            + self.beta.nbytes
+            + self.running_mean.nbytes
+            + self.running_var.nbytes
+            + self.std.nbytes
+            + self.xc.nbytes
+            + self.xn.nbytes
+            if self.gamma is not None and self.beta is not None
+            else 0
+        )
+        mem_gradients = self.dgamma.nbytes + self.dbeta.nbytes
+        mem_activation = 0
+        return {
+            "params": mem_params,
+            "gradients": mem_gradients,
+            "activation": mem_activation,
+        }
+
 
 class PoolingLayer:
     def __init__(self, pool_h, pool_w, stride=1, pad=0):
@@ -319,6 +390,21 @@ class PoolingLayer:
 
         return dx
 
+    def memory_usage(self):
+        # ReLU는 파라미터나 기울기를 갖지 않으므로 activation만 계산
+        mem_params = (
+            self.x.nbytes + self.arg_max.nbytes
+            if self.x is not None and self.arg_max is not None
+            else 0
+        )
+        mem_gradients = 0
+        mem_activation = 0
+        return {
+            "params": mem_params,
+            "gradients": mem_gradients,
+            "activation": mem_activation,
+        }
+
 
 class ConvolutionLayer:
     def __init__(self, W, b, stride=1, pad=0):
@@ -368,6 +454,23 @@ class ConvolutionLayer:
         self.backward_time += time.perf_counter() - start
         return dx
 
+    def memory_usage(self):
+        # ReLU는 파라미터나 기울기를 갖지 않으므로 activation만 계산
+        mem_params = (
+            self.W.nbytes
+            + self.b.nbytes
+            + self.col.nbytes
+            + self.col_W.nbytes
+            + self.x.nbytes
+        )
+        mem_gradients = self.dW.nbytes + self.db.nbytes
+        mem_activation = 0
+        return {
+            "params": mem_params,
+            "gradients": mem_gradients,
+            "activation": mem_activation,
+        }
+
 
 class DropoutLayer:
     def __init__(self, dropout_ratio=0.5):
@@ -388,3 +491,14 @@ class DropoutLayer:
 
     def backward(self, dout):
         return dout * self.mask
+
+    def memory_usage(self):
+        # ReLU는 파라미터나 기울기를 갖지 않으므로 activation만 계산
+        mem_params = 1
+        mem_gradients = 0
+        mem_activation = self.mask.nbytes if self.mask is not None else 0
+        return {
+            "params": mem_params,
+            "gradients": mem_gradients,
+            "activation": mem_activation,
+        }
