@@ -455,7 +455,6 @@ class ConvolutionLayer:
         return dx
 
     def memory_usage(self):
-        # ReLU는 파라미터나 기울기를 갖지 않으므로 activation만 계산
         mem_params = (
             self.W.nbytes
             + self.b.nbytes

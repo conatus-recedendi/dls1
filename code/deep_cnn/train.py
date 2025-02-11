@@ -19,6 +19,7 @@ from common.deep_conv_net import DeepConvNet
 x_train = x_train.reshape(-1, 1, 28, 28)
 t_train = t_train
 x_test = x_test.reshape(-1, 1, 28, 28)
+t_test = t_test
 
 
 def run():
@@ -37,7 +38,7 @@ def run():
 
     model = DeepConvNet(
         input_dim=(1, 28, 28),
-        hidden_size=100,
+        hidden_size=50,
         output_size=10,
         dropout_ratio=wandb.config.dropout,
         weight_init_std=wandb.config.weight_init_std,
