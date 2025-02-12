@@ -1,4 +1,5 @@
-import numpy as np
+from common.np import *  # import numpy as np
+from common.config import GPU
 import time
 from common.functions import cross_entropy_error, softmax, sigmoid
 from common.utils import im2col, col2im

@@ -12,6 +12,10 @@ from common.optimizer import SGD, Momentum, AdaGrad, Adam
 from common.deep_conv_net import DeepConvNet
 
 
+os.environ["OMP_NUM_THREADS"] = "4"
+os.environ["MKL_NUM_THREADS"] = "4"
+
+
 ### training ###
 
 (x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
@@ -114,11 +118,11 @@ wandb_sweep_config = {
     "method": "grid",
     "metric": {"name": "test_acc", "goal": "maximize"},
     "parameters": {
-        "seed": {"value": 1000},
+        "seed": {"value": 2000},
         "gradient_descent": {"value": "Adam"},
-        "learning_rate": {"value": 0.01},
-        "epochs": {"value": 64},
-        "batch_size": {"value": 64},
+        "learning_rate": {"value": 0.001},
+        "epochs": {"value": 20},
+        "batch_size": {"value": 100},
         "model": {"value": "DeepConvNet"},
         "batch_norm": {"value": False},
         "weight_decay_lambda": {"value": 0},
