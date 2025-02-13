@@ -10,7 +10,8 @@ from dataset.mnist import load_mnist
 from common.trainer import Trainer
 from common.optimizer import SGD, Momentum, AdaGrad, Adam
 from common.deep_conv_net import DeepConvNet
-
+from common.utils import to_gpu
+from common import config
 
 os.environ["OMP_NUM_THREADS"] = "4"
 os.environ["MKL_NUM_THREADS"] = "4"
@@ -20,10 +21,19 @@ os.environ["MKL_NUM_THREADS"] = "4"
 
 (x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
 
+
 x_train = x_train.reshape(-1, 1, 28, 28)
 t_train = t_train
 x_test = x_test.reshape(-1, 1, 28, 28)
 t_test = t_test
+
+# config.GPU = True
+
+if config.GPU:
+    x_train = to_gpu(x_train)
+    t_train = to_gpu(t_train)
+    x_test = to_gpu(x_test)
+    t_test = to_gpu(t_test)
 
 
 def run():

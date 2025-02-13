@@ -80,3 +80,19 @@ def col2im(col, input_shape, filter_h, filter_w, stride=1, pad=0):
             img[:, :, y:y_max:stride, x:x_max:stride] += col[:, :, y, x, :, :]
 
     return img[:, :, pad : H + pad, pad : W + pad]
+
+
+def to_cpu(x):
+    import numpy
+
+    if type(x) == numpy.ndarray:
+        return x
+    return np.asnumpy(x)
+
+
+def to_gpu(x):
+    import cupy
+
+    if type(x) == cupy.ndarray:
+        return x
+    return cupy.asarray(x)
