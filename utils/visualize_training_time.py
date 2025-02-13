@@ -59,15 +59,6 @@ def visualize_training_time(input_path, output_path, max_rank=10):
 
     values_by_backward = sorted(values, key=lambda x: x["backward"], reverse=True)
     remaining_backward = sum([x["backward"] for x in values_by_backward[max_rank:]])
-
-    # label_by_forward_rank = lambda x: x["label"]
-    # value_by_forward_rank = lamb
-
-    # print(label_by_forward_rank(values_by_forward[:max_rank]))
-    # print(
-    #     [x["forward"] for x in values_by_forward[:max_rank]] + [remaining_forward],
-    #     [x["label"] for x in values_by_forward[:max_rank]] + ["Other"],
-    # )
     plt.pie(
         [x["forward"] for x in values_by_forward[:max_rank]] + [remaining_forward],
         labels=[x["label"] for x in values_by_forward[:max_rank]] + ["Other"],
