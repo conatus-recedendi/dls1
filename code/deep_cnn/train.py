@@ -34,7 +34,7 @@ def run():
 
     np.random.seed(wandb.config.seed)
     # 각 실험의 고유한 키 생성
-    output_name = "output/output_seed=" + str(wandb.config.seed) + "_id=" + wandb.run.id
+    output_name = "output/run-" + wandb.run.id
 
     # 폴더가 없으면 생성
     if not os.path.exists(output_name):

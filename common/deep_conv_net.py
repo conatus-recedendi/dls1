@@ -1,3 +1,4 @@
+import pickle
 import os, sys
 
 sys.path.append(os.pardir)
@@ -22,11 +23,6 @@ class DeepConvNet:
         dropout_ratio=0,
     ):
         self.input_dim = input_dim
-        # filter_num = conv_param["filter_num"]
-        # filter_size = conv_param["filter_size"]
-        # filter_pad = conv_param["pad"]
-        # filter_stride = conv_param["stride"]
-        # input_size = input_dim[1]
 
         pre_node_nums = np.array(
             [
@@ -230,3 +226,21 @@ class DeepConvNet:
             total_backward += layer.backward_time
         time_usage["Total"] = {"forward": total_forward, "backward": total_backward}
         return time_usage
+
+    def save_params(self, file_name="params.pkl"):
+        params = {}
+        for key, val in self.params.items():
+            params[key] = val
+        with open(file_name, "wb") as f:
+            pickle.dump(params, f)
+
+    def load_params(self, file_name="params.pkl"):
+        with open(os.path.dirname(__file__) + "/" + file_name, "rb") as f:
+            params = pickle.load(f)
+
+        for key, val in params.items():
+            self.params[key] = val
+
+        for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12, 15, 18)):
+            self.layers[layer_idx].W = self.params["W" + str(i + 1)]
+            self.layers[layer_idx].b = self.params["b" + str(i + 1)]
