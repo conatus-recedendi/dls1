@@ -68,6 +68,7 @@ def visualize_training_time(input_path, output_path, max_rank=10):
         labels=[x["label"] for x in values_by_forward[:max_rank]] + ["Other"],
         autopct=(lambda pct: f"{pct/100*total_time:.2f}s({pct:.1f}%)"),
         textprops={"fontsize": 8},
+        radius=2,
     )
     plt.title("Forward Time")
 
@@ -77,6 +78,7 @@ def visualize_training_time(input_path, output_path, max_rank=10):
         labels=[x["label"] for x in values_by_backward[:max_rank]] + ["Other"],
         autopct=(lambda pct: f"{pct/100*total_time:.2f}s({pct:.1f}%)"),
         textprops={"fontsize": 8},
+        radius=2,
     )
     plt.title("Backward Time")
 
