@@ -73,7 +73,7 @@ def visualize_training_time(input_path, output_path, max_rank=10):
     plt.title("Forward Time")
 
     plt.subplot(2, 1, 2)
-    plt.subplots_adjust(hspace=1.5)
+    plt.subplots_adjust(hspace=0.5)
     plt.pie(
         [x["backward"] for x in values_by_backward[:max_rank]] + [remaining_backward],
         labels=[x["label"] for x in values_by_backward[:max_rank]] + ["Other"],
