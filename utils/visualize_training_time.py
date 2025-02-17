@@ -56,13 +56,18 @@ def visualize_training_time(input_path, output_path, max_rank=10):
 
     values_by_forward = sorted(values, key=lambda x: x["forward"], reverse=True)
     remaining_forward = sum([x["forward"] for x in values_by_forward[max_rank:]])
+    sum_forward = sum([x["forward"] for x in values_by_forward])
 
     values_by_backward = sorted(values, key=lambda x: x["backward"], reverse=True)
     remaining_backward = sum([x["backward"] for x in values_by_backward[max_rank:]])
+    sum_backward = sum([x["backward"] for x in values_by_backward])
+    total_time = sum_forward + sum_backward
+
     plt.pie(
         [x["forward"] for x in values_by_forward[:max_rank]] + [remaining_forward],
         labels=[x["label"] for x in values_by_forward[:max_rank]] + ["Other"],
-        autopct="%1.1f%%",
+        autopct=(lambda pct: f"{pct/100*total_time:.2f}s({pct:.1f}%)"),
+        textprops={"fontsize": 8},
     )
     plt.title("Forward Time")
 
@@ -70,7 +75,8 @@ def visualize_training_time(input_path, output_path, max_rank=10):
     plt.pie(
         [x["backward"] for x in values_by_backward[:max_rank]] + [remaining_backward],
         labels=[x["label"] for x in values_by_backward[:max_rank]] + ["Other"],
-        autopct="%1.1f%%",
+        autopct=(lambda pct: f"{pct/100*total_time:.2f}s({pct:.1f}%)"),
+        textprops={"fontsize": 8},
     )
     plt.title("Backward Time")
 
