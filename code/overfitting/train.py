@@ -14,13 +14,11 @@ from common.optimizer import SGD, Momentum, AdaGrad, Adam
 
 ### training ###
 
-(x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
-
-x_train = x_train[:300]
-t_train = t_train[:300]
-
 
 def run():
+    (x_train, t_train), (x_test, t_test) = load_mnist(
+        normalize=True, one_hot_label=True
+    )
 
     wandb.init(
         name="overfitting",
@@ -30,6 +28,9 @@ def run():
     # 각 실험의 고유한 키 생성
     output_name = "output/output_seed=" + str(wandb.config.seed) + "_id=" + wandb.run.id
 
+    t_train = t_train[: wandb.config.training_size]
+
+    x_train = x_train[: wandb.config.training_size]
     # 폴더가 없으면 생성
     if not os.path.exists(output_name):
         os.makedirs(output_name)
@@ -104,15 +105,16 @@ wandb_sweep_config = {
         "seed": {"value": 1000},
         "gradient_descent": {"value": "SGD"},
         "learning_rate": {"value": 0.01},
-        "epochs": {"value": 300},
+        "epochs": {"value": 100},
         "batch_size": {"value": 100},
         "model": {"value": "MultiLayerNet-7layer"},
         "batch_norm": {"value": False},
         "weight_decay_lambda": {"values": [0, 0.1]},
-        "dataset": {"value": "mnist-300"},
+        "dataset": {"value": "mnist"},
+        "training_size": {"value": [10000, 20000, 60000]},
         "activation": {"value": "relu"},
         "weight_init_std": {"value": "he"},
-        "dropout": {"values": [0, 0.15]},
+        "dropout": {"values": [0, 0.2]},
     },
 }
 
