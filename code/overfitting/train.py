@@ -109,12 +109,12 @@ wandb_sweep_config = {
         "batch_size": {"value": 100},
         "model": {"value": "MultiLayerNet-7layer"},
         "batch_norm": {"value": False},
-        "weight_decay_lambda": {"values": [0, 0.1]},
+        "weight_decay_lambda": {"values": [0.1, 0.01, 0.001]},
         "dataset": {"value": "mnist"},
         "training_size": {"value": 60000},
         "activation": {"value": "relu"},
         "weight_init_std": {"value": "he"},
-        "dropout": {"values": [0, 0.2]},
+        "dropout": {"value": 0},
     },
 }
 
