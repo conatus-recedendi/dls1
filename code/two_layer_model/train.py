@@ -14,10 +14,11 @@ from common.optimizer import SGD
 
 ### training ###
 
-(x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
-
 
 def run():
+    (x_train, t_train), (x_test, t_test) = load_mnist(
+        normalize=True, one_hot_label=True
+    )
 
     wandb.init(
         name="two_layer_model re-implementation",
@@ -30,6 +31,9 @@ def run():
     # 폴더가 없으면 생성
     if not os.path.exists(output_name):
         os.makedirs(output_name)
+
+    x_train = x_train[: wandb.config.training_size]
+    t_train = t_train[: wandb.config.training_size]
 
     model = MultiLayerNet(
         input_size=784, hidden_size_list=[100], output_size=10, weight_init_std=0.01
@@ -87,17 +91,18 @@ def run():
 train_loss_history = []
 
 
-seeds = [1000, 2000, 3000, 4000, 5000]
+# seeds = [1000, 2000, 3000, 4000, 5000]
 
 wandb_sweep_config = {
     "method": "grid",
     "name": "two_layer_model",
     "metric": {"name": "test_acc", "goal": "maximize"},
     "parameters": {
-        "seed": {"values": seeds},
+        "seed": {"value": 1000},
         "learning_rate": {"value": 0.01},
         "epochs": {"value": 100},
         "batch_size": {"value": 100},
+        "training_size": {"values": [10000, 20000, 60000]},
     },
 }
 
