@@ -38,10 +38,10 @@ def run():
         weight_init_std=0.01,
     )
     optimizer = {
-        "SGD": SGD(lr=wandb.config.learning_rate),
-        "Momentum": Momentum(lr=wandb.config.learning_rate),
-        "AdaGrad": AdaGrad(lr=wandb.config.learning_rate),
-        "Adam": Adam(lr=wandb.config.learning_rate),
+        "SGD": SGD(),
+        "Momentum": Momentum(),
+        "AdaGrad": AdaGrad(),
+        "Adam": Adam(),
     }[wandb.config.gradient_descent]
 
     trainer = Trainer(
@@ -91,14 +91,12 @@ def run():
 train_loss_history = []
 
 
-seeds = [1000, 2000, 3000, 4000, 5000]
-
 wandb_sweep_config = {
     "method": "grid",
     "name": "gradient_descent",
     "metric": {"name": "test_acc", "goal": "maximize"},
     "parameters": {
-        "seed": {"value": 1000},
+        "seed": {"values": [1000, 2000, 3000, 4000, 5000]},
         "gradient_descent": {"values": ["SGD", "Momentum", "AdaGrad", "Adam"]},
         "learning_rate": {"value": 0.01},
         "epochs": {"value": 100},
