@@ -105,7 +105,7 @@ class MultiLayerNet:
         y = self.predict(x, train_flg)
 
         weight_decay = 0
-        for idx in range(self.hidden_layer_num):
+        for idx in range(self.hidden_layer_num + 1):
             W = self.params["W" + str(idx)]
             weight_decay += 0.5 * self.weight_decay_lambda * np.sum(W**2)
 

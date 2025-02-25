@@ -37,7 +37,7 @@ def run():
 
     model = MultiLayerNet(
         input_size=784,
-        hidden_size_list=[100, 100, 100, 100, 100, 100, 100],
+        hidden_size_list=[100, 100, 100, 100, 100, 100],
         output_size=10,
         weight_init_std=wandb.config.weight_init_std,
         activation=wandb.config.activation,
@@ -104,14 +104,14 @@ wandb_sweep_config = {
     "parameters": {
         "seed": {"value": 1000},
         "gradient_descent": {"value": "SGD"},
-        "learning_rate": {"value": 0.01},
+        "learning_rate": {"value": 0.1},
         "epochs": {"value": 100},
         "batch_size": {"value": 100},
         "model": {"value": "MultiLayerNet-7layer"},
         "batch_norm": {"value": False},
         "weight_decay_lambda": {"values": [0, 0.1]},
         "dataset": {"value": "mnist"},
-        "training_size": {"values": [10000, 20000, 60000]},
+        "training_size": {"values": 60000},
         "activation": {"value": "relu"},
         "weight_init_std": {"value": "he"},
         "dropout": {"values": [0, 0.2]},
