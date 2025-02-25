@@ -111,7 +111,7 @@ wandb_sweep_config = {
         "batch_norm": {"value": False},
         "weight_decay_lambda": {"values": [0, 0.1]},
         "dataset": {"value": "mnist"},
-        "training_size": {"value": [10000, 20000, 60000]},
+        "training_size": {"values": [10000, 20000, 60000]},
         "activation": {"value": "relu"},
         "weight_init_std": {"value": "he"},
         "dropout": {"values": [0, 0.2]},
