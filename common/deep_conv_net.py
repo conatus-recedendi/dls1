@@ -262,6 +262,97 @@ from common.layer import (
 #         self.last_layer = SoftmaxWithLoss()
 
 
+# class DeepConvNet:
+#     def __init__(
+#         self,
+#         input_dim=(1, 28, 28),
+#         hidden_size=30,
+#         output_size=10,
+#         weight_init_std="he",
+#         dropout_ratio=0,
+#     ):
+#         self.input_dim = input_dim
+
+#         # Flatten input 크기 = 32 × 3 × 3 = 288
+#         pre_node_nums = np.array(
+#             [
+#                 1 * 3 * 3,  # Conv1
+#                 16 * 3 * 3,  # Conv2
+#                 32 * 3 * 3,  # FC input (Flatten)
+#                 hidden_size,  # FC hidden
+#             ]
+#         )
+#         weight_init_scales = np.sqrt(2.0 / pre_node_nums)
+
+#         # 간소화된 Conv 구조
+#         conv_param_list = [
+#             {"filter_num": 16, "filter_size": 3, "pad": 1, "stride": 1},
+#             {"filter_num": 32, "filter_size": 3, "pad": 1, "stride": 1},
+#         ]
+
+#         pre_channel_num = input_dim[0]
+#         self.params = {}
+
+#         # Convolution Layer 파라미터
+#         for idx, conv_param in enumerate(conv_param_list):
+#             self.params[f"W{idx+1}"] = weight_init_scales[idx] * np.random.randn(
+#                 conv_param["filter_num"],
+#                 pre_channel_num,
+#                 conv_param["filter_size"],
+#                 conv_param["filter_size"],
+#             )
+#             self.params[f"b{idx+1}"] = np.zeros(conv_param["filter_num"])
+#             pre_channel_num = conv_param["filter_num"]
+
+#         # FC Layer 파라미터
+#         self.params["W3"] = weight_init_scales[2] * np.random.randn(
+#             32 * 3 * 3, hidden_size
+#         )
+#         self.params["b3"] = np.zeros(hidden_size)
+
+#         self.params["W4"] = weight_init_scales[3] * np.random.randn(
+#             hidden_size, output_size
+#         )
+#         self.params["b4"] = np.zeros(output_size)
+
+#         self.layers = []
+
+#         # Conv1 → ReLU → Pool
+#         self.layers.append(
+#             ConvolutionLayer(
+#                 self.params["W1"],
+#                 self.params["b1"],
+#                 stride=conv_param_list[0]["stride"],
+#                 pad=conv_param_list[0]["pad"],
+#             )
+#         )
+#         self.layers.append(ReLULayer())
+#         self.layers.append(PoolingLayer(pool_h=2, pool_w=2, stride=2))  # → 14x14
+
+#         # Conv2 → ReLU → Pool (추가)
+#         self.layers.append(
+#             ConvolutionLayer(
+#                 self.params["W2"],
+#                 self.params["b2"],
+#                 stride=conv_param_list[1]["stride"],
+#                 pad=conv_param_list[1]["pad"],
+#             )
+#         )
+#         self.layers.append(ReLULayer())
+#         self.layers.append(PoolingLayer(pool_h=2, pool_w=2, stride=2))  # → 7x7
+#         self.layers.append(PoolingLayer(pool_h=2, pool_w=2, stride=2))  # → 3x3
+
+#         # Affine → ReLU → Dropout
+#         self.layers.append(AffineLayer(self.params["W3"], self.params["b3"]))
+#         self.layers.append(ReLULayer())
+#         self.layers.append(DropoutLayer(dropout_ratio))
+
+#         # Affine → Dropout
+#         self.layers.append(AffineLayer(self.params["W4"], self.params["b4"]))
+#         self.layers.append(DropoutLayer(dropout_ratio))
+
+
+#         self.last_layer = SoftmaxWithLoss()
 class DeepConvNet:
     def __init__(
         self,
@@ -273,47 +364,39 @@ class DeepConvNet:
     ):
         self.input_dim = input_dim
 
-        # Flatten input 크기 = 32 × 3 × 3 = 288
+        # Conv → Pool → Flatten → FC(30) → FC(10)
         pre_node_nums = np.array(
             [
                 1 * 3 * 3,  # Conv1
-                16 * 3 * 3,  # Conv2
-                32 * 3 * 3,  # FC input (Flatten)
-                hidden_size,  # FC hidden
+                16 * 14 * 14,  # FC input = 1 Conv + 1 Pool
+                hidden_size,
             ]
         )
         weight_init_scales = np.sqrt(2.0 / pre_node_nums)
 
-        # 간소화된 Conv 구조
-        conv_param_list = [
-            {"filter_num": 16, "filter_size": 3, "pad": 1, "stride": 1},
-            {"filter_num": 32, "filter_size": 3, "pad": 1, "stride": 1},
-        ]
+        conv_param = {"filter_num": 16, "filter_size": 3, "pad": 1, "stride": 1}
 
-        pre_channel_num = input_dim[0]
         self.params = {}
 
-        # Convolution Layer 파라미터
-        for idx, conv_param in enumerate(conv_param_list):
-            self.params[f"W{idx+1}"] = weight_init_scales[idx] * np.random.randn(
-                conv_param["filter_num"],
-                pre_channel_num,
-                conv_param["filter_size"],
-                conv_param["filter_size"],
-            )
-            self.params[f"b{idx+1}"] = np.zeros(conv_param["filter_num"])
-            pre_channel_num = conv_param["filter_num"]
-
-        # FC Layer 파라미터
-        self.params["W3"] = weight_init_scales[2] * np.random.randn(
-            32 * 3 * 3, hidden_size
+        # Convolution Layer (1개)
+        self.params["W1"] = weight_init_scales[0] * np.random.randn(
+            conv_param["filter_num"],
+            input_dim[0],
+            conv_param["filter_size"],
+            conv_param["filter_size"],
         )
-        self.params["b3"] = np.zeros(hidden_size)
+        self.params["b1"] = np.zeros(conv_param["filter_num"])
 
-        self.params["W4"] = weight_init_scales[3] * np.random.randn(
+        # FC Layers
+        self.params["W2"] = weight_init_scales[1] * np.random.randn(
+            16 * 14 * 14, hidden_size
+        )
+        self.params["b2"] = np.zeros(hidden_size)
+
+        self.params["W3"] = weight_init_scales[2] * np.random.randn(
             hidden_size, output_size
         )
-        self.params["b4"] = np.zeros(output_size)
+        self.params["b3"] = np.zeros(output_size)
 
         self.layers = []
 
@@ -322,33 +405,20 @@ class DeepConvNet:
             ConvolutionLayer(
                 self.params["W1"],
                 self.params["b1"],
-                stride=conv_param_list[0]["stride"],
-                pad=conv_param_list[0]["pad"],
+                stride=conv_param["stride"],
+                pad=conv_param["pad"],
             )
         )
         self.layers.append(ReLULayer())
-        self.layers.append(PoolingLayer(pool_h=2, pool_w=2, stride=2))  # → 14x14
+        self.layers.append(PoolingLayer(pool_h=2, pool_w=2, stride=2))  # (28→14)
 
-        # Conv2 → ReLU → Pool (추가)
-        self.layers.append(
-            ConvolutionLayer(
-                self.params["W2"],
-                self.params["b2"],
-                stride=conv_param_list[1]["stride"],
-                pad=conv_param_list[1]["pad"],
-            )
-        )
-        self.layers.append(ReLULayer())
-        self.layers.append(PoolingLayer(pool_h=2, pool_w=2, stride=2))  # → 7x7
-        self.layers.append(PoolingLayer(pool_h=2, pool_w=2, stride=2))  # → 3x3
-
-        # Affine → ReLU → Dropout
-        self.layers.append(AffineLayer(self.params["W3"], self.params["b3"]))
+        # FC1 → ReLU → Dropout
+        self.layers.append(AffineLayer(self.params["W2"], self.params["b2"]))
         self.layers.append(ReLULayer())
         self.layers.append(DropoutLayer(dropout_ratio))
 
-        # Affine → Dropout
-        self.layers.append(AffineLayer(self.params["W4"], self.params["b4"]))
+        # FC2 → Dropout
+        self.layers.append(AffineLayer(self.params["W3"], self.params["b3"]))
         self.layers.append(DropoutLayer(dropout_ratio))
 
         self.last_layer = SoftmaxWithLoss()
@@ -387,7 +457,7 @@ class DeepConvNet:
         # for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12, 15, 18)):
         #     grads["W" + str(i + 1)] = self.layers[layer_idx].dW
         #     grads["b" + str(i + 1)] = self.layers[layer_idx].db
-        for i, layer_idx in enumerate((0, 3, 7, 10)):
+        for i, layer_idx in enumerate((0, 3, 6)):
             grads["W" + str(i + 1)] = self.layers[layer_idx].dW
             grads["b" + str(i + 1)] = self.layers[layer_idx].db
 
