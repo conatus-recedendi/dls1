@@ -295,7 +295,7 @@ class DeepConvNet:
         # for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12, 15, 18)):
         #     grads["W" + str(i + 1)] = self.layers[layer_idx].dW
         #     grads["b" + str(i + 1)] = self.layers[layer_idx].db
-        for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12)):
+        for i, layer_idx in enumerate((0, 3, 6, 9, 12)):
             grads["W" + str(i + 1)] = self.layers[layer_idx].dW
             grads["b" + str(i + 1)] = self.layers[layer_idx].db
 
