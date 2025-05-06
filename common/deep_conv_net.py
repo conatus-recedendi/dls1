@@ -292,7 +292,10 @@ class DeepConvNet:
             dout = layer.backward(dout)
 
         grads = {}
-        for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12, 15, 18)):
+        # for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12, 15, 18)):
+        #     grads["W" + str(i + 1)] = self.layers[layer_idx].dW
+        #     grads["b" + str(i + 1)] = self.layers[layer_idx].db
+        for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12)):
             grads["W" + str(i + 1)] = self.layers[layer_idx].dW
             grads["b" + str(i + 1)] = self.layers[layer_idx].db
 
@@ -356,6 +359,6 @@ class DeepConvNet:
         for key, val in params.items():
             self.params[key] = val
 
-        for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12, 15, 18)):
-            self.layers[layer_idx].W = self.params["W" + str(i + 1)]
-            self.layers[layer_idx].b = self.params["b" + str(i + 1)]
+        # for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12, 15, 18)):
+        #     self.layers[layer_idx].W = self.params["W" + str(i + 1)]
+        #     self.layers[layer_idx].b = self.params["b" + str(i + 1)]
