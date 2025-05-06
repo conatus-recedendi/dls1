@@ -24,6 +24,8 @@ def run():
         name="two_layer_model re-implementation",
     )
 
+    wandb.config.update({"baseline": True}, allow_val_change=True)
+
     np.random.seed(wandb.config.seed)
     # 각 실험의 고유한 키 생성
     output_name = "output/output_seed=" + str(wandb.config.seed) + "_id=" + wandb.run.id
@@ -99,13 +101,13 @@ wandb_sweep_config = {
     "metric": {"name": "test_acc", "goal": "maximize"},
     "parameters": {
         "seed": {"value": 1000},
-        "learning_rate": {"value": 0.01},
+        "learning_rate": {"value": 0.1},
         "epochs": {"value": 100},
         "batch_size": {"value": 100},
-        "training_size": {"values": [10000, 20000, 60000]},
+        "training_size": {"value": 60000},
     },
 }
 
-sweep_id = wandb.sweep(sweep=wandb_sweep_config, project="DILab - scratch 1")
+sweep_id = wandb.sweep(sweep=wandb_sweep_config, project="MLP, CNN")
 
 wandb.agent(sweep_id, function=run)

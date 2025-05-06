@@ -13,19 +13,41 @@ from common.deep_conv_net import DeepConvNet
 from common.utils import to_gpu
 from common import config
 
+from common.nlp import preprocess, create_context_target, convert_one_hot
+from common.cbow import CBOW
+
 os.environ["OMP_NUM_THREADS"] = "4"
 os.environ["MKL_NUM_THREADS"] = "4"
 
-
-### training ###
-
-(x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
+os.environ["WANDB_DISABLED"] = "true"
 
 
-x_train = x_train.reshape(-1, 1, 28, 28)
-t_train = t_train
-x_test = x_test.reshape(-1, 1, 28, 28)
-t_test = t_test
+### parameter ###
+
+window_size = 2
+### load dataset ###
+
+text = "You say goodbye and I say hello."
+corpus, word_to_id, id_to_word = preprocess(text)
+
+
+vocab_size = len(word_to_id)
+contexts, target = create_context_target(corpus, window_size)
+
+
+print("before", contexts)
+target = convert_one_hot(target, len(word_to_id))
+
+contexts = convert_one_hot(contexts, len(word_to_id))
+print("after", contexts)
+
+x_train = contexts
+t_train = target
+
+x_test = contexts
+t_test = target
+
+# (x_train, t_train), (x_test, t_test) = load_mnist(normalize=True, one_hot_label=True)
 
 # config.GPU = True
 
@@ -39,7 +61,7 @@ if config.GPU:
 def run():
 
     wandb.init(
-        name="deep_cnn",
+        name="cbow_small",
     )
 
     np.random.seed(wandb.config.seed)
@@ -49,13 +71,11 @@ def run():
     # 폴더가 없으면 생성
     if not os.path.exists(output_name):
         os.makedirs(output_name)
-
-    model = DeepConvNet(
-        input_dim=(1, 28, 28),
-        hidden_size=50,
-        output_size=10,
-        dropout_ratio=wandb.config.dropout,
-        weight_init_std=wandb.config.weight_init_std,
+    print(wandb.config.model_params)
+    model = CBOW(
+        vocab_size,
+        hidden_size=wandb.config.model_params["hidden_size"],
+        window_size=wandb.config.model_params["window_size"],
     )
 
     optimizer = {
@@ -65,6 +85,7 @@ def run():
         "Adam": Adam(lr=wandb.config.learning_rate),
     }[wandb.config.gradient_descent]
 
+    print("x_train, t_train", x_train, t_train)
     trainer = Trainer(
         model,
         optimizer=optimizer,
@@ -78,23 +99,7 @@ def run():
         output_name=output_name,
     )
 
-    # print(x_test.shape)
-    ### Custom Log
-    w1 = model.params["W1"]
-    image_w1_list = []
-    for i in range(16):
-        image_w1_list.append(wandb.Image(w1[i][0].reshape(3, 3)))
-    wandb.log({f"conv1_filter_before": image_w1_list})
-
     trainer.train()
-
-    w1 = model.params["W1"]
-    image_w1_list = []
-    for i in range(16):
-        image_w1_list.append(wandb.Image(w1[i][0].reshape(3, 3)))
-    wandb.log({f"conv1_filter_after": image_w1_list})
-
-    mem_usage = model.memory_usage()
 
     with open(f"{output_name}/train_loss.txt", "w") as f:
         for loss in trainer.loss_history:
@@ -108,41 +113,38 @@ def run():
         for acc in trainer.test_acc_history:
             f.write(str(acc) + "\n")
 
+    mem_usage = model.memory_usage()
     with open(f"{output_name}/memory_usage.txt", "w") as f:
         for layer, usage in mem_usage.items():
-            print(layer, usage)
-            print(json.dumps(usage))
             f.write(f"{layer}: {json.dumps(usage)}\n")
     # 각 layer의 실행 시간 확인
     times = model.training_time()
-
     with open(f"{output_name}/training_time.txt", "w") as f:
         for layer, timing in times.items():
-            print(layer, timing)
-            print(json.dumps(timing))
             f.write(f"{layer}: {json.dumps(timing)}\n")
 
 
 wandb_sweep_config = {
-    "name": "deep_cnn",
+    "name": "cbow_small",
     "method": "grid",
     "metric": {"name": "test_acc", "goal": "maximize"},
     "parameters": {
-        "seed": {"value": 2000},
+        "seed": {"value": [1000]},
         "gradient_descent": {"value": "Adam"},
         "learning_rate": {"value": 0.001},
-        "epochs": {"value": 20},
-        "batch_size": {"value": 100},
-        "model": {"value": "DeepConvNet"},
-        "batch_norm": {"value": False},
-        "weight_decay_lambda": {"value": 0},
-        "dataset": {"value": "mnist"},
-        "activation": {"value": "relu"},
-        "weight_init_std": {"value": "he"},
-        "dropout": {"value": 0.15},
+        "epochs": {"value": 1000},
+        "batch_size": {"value": 3},
+        "model": {"value": "CBOW_small"},
+        "model_params": {"value": {"hidden_size": 5, "window_size": window_size}},
+        # "batch_norm": {"value": False},
+        # "weight_decay_lambda": {"value": 0},
+        # "dataset": {"value": ""},
+        # "activation": {"value": "relu"},
+        # "weight_init_std": {"value": "he"},
+        # "dropout": {"value": 0.15},
     },
 }
 
-sweep_id = wandb.sweep(sweep=wandb_sweep_config, project="MLP, CNN")
+sweep_id = wandb.sweep(sweep=wandb_sweep_config, project="DILab - scratch 1")
 
 wandb.agent(sweep_id, function=run)
