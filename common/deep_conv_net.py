@@ -157,6 +157,13 @@ class DeepConvNet:
 
         self.last_layer = SoftmaxWithLoss()
 
+        # print weight parametr count
+        params_cnt = 0
+        for i, layer_idx in enumerate((0, 2, 5, 7, 10, 12, 15, 18)):
+            params_cnt += np.prod(self.layers[layer_idx].W.shape)
+            params_cnt += np.prod(self.layers[layer_idx].b.shape)
+        print("Total params count: ", params_cnt)
+
     def predict(self, x, train_flag=False):
         # print("predict")
         for layer in self.layers:
