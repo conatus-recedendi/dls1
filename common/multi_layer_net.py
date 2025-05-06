@@ -75,6 +75,10 @@ class MultiLayerNet:
         )
 
         self.last_layer = SoftmaxWithLoss()
+        params_cnt = 0
+        for key, value in self.params.items():
+            params_cnt += np.prod(value.shape)
+        print(f"Total params count: {params_cnt}")
 
     def init_weight(self, weight_init_std):
         params_list = [self.input_size] + self.hidden_size_list + [self.output_size]
