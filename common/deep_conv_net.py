@@ -364,32 +364,24 @@ class DeepConvNet:
     ):
         self.input_dim = input_dim
 
-        # Conv → Pool → Flatten → FC(30) → FC(10)
         pre_node_nums = np.array(
             [
-                1 * 3 * 3,  # Conv1
-                16 * 14 * 14,  # FC input = 1 Conv + 1 Pool
-                hidden_size,
+                1 * 5 * 5,  # Conv1 (5x5 kernel, 1 channel)
+                8 * 8 * 8,  # FC input (Flattened feature map)
+                hidden_size,  # FC hidden
             ]
         )
         weight_init_scales = np.sqrt(2.0 / pre_node_nums)
 
-        conv_param = {"filter_num": 16, "filter_size": 3, "pad": 1, "stride": 1}
-
         self.params = {}
 
-        # Convolution Layer (1개)
-        self.params["W1"] = weight_init_scales[0] * np.random.randn(
-            conv_param["filter_num"],
-            input_dim[0],
-            conv_param["filter_size"],
-            conv_param["filter_size"],
-        )
-        self.params["b1"] = np.zeros(conv_param["filter_num"])
+        # Conv1: 8 filters, 5x5 kernel, pad=0 → output 24x24
+        self.params["W1"] = weight_init_scales[0] * np.random.randn(8, 1, 5, 5)
+        self.params["b1"] = np.zeros(8)
 
-        # FC Layers
+        # Pooling → 12x12 → we crop with pad=0 → FC input = 8×8×8
         self.params["W2"] = weight_init_scales[1] * np.random.randn(
-            16 * 14 * 14, hidden_size
+            8 * 8 * 8, hidden_size
         )
         self.params["b2"] = np.zeros(hidden_size)
 
@@ -400,24 +392,16 @@ class DeepConvNet:
 
         self.layers = []
 
-        # Conv1 → ReLU → Pool
         self.layers.append(
-            ConvolutionLayer(
-                self.params["W1"],
-                self.params["b1"],
-                stride=conv_param["stride"],
-                pad=conv_param["pad"],
-            )
+            ConvolutionLayer(self.params["W1"], self.params["b1"], stride=1, pad=0)
         )
         self.layers.append(ReLULayer())
-        self.layers.append(PoolingLayer(pool_h=2, pool_w=2, stride=2))  # (28→14)
+        self.layers.append(PoolingLayer(pool_h=3, pool_w=3, stride=3))  # 24→8
 
-        # FC1 → ReLU → Dropout
         self.layers.append(AffineLayer(self.params["W2"], self.params["b2"]))
         self.layers.append(ReLULayer())
         self.layers.append(DropoutLayer(dropout_ratio))
 
-        # FC2 → Dropout
         self.layers.append(AffineLayer(self.params["W3"], self.params["b3"]))
         self.layers.append(DropoutLayer(dropout_ratio))
 
